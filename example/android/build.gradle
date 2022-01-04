@@ -14,6 +14,7 @@ allprojects {
         google()
         mavenCentral()
         flatDir {
+            dirs project(':flutter_oppwa').file('libs')
             dirs 'libs'
         }
     }

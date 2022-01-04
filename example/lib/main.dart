@@ -16,34 +16,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =
-          await FlutterOppwa.platformVersion ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
   @override
@@ -54,9 +29,54 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: IconButton(
+            icon: const Icon(Icons.play_arrow),
+            onPressed: _testCall,
+          ),
         ),
       ),
     );
+  }
+
+  void _testCall() async {
+    //https://wordpresshyperpay.docs.oppwa.com/reference/resultCodes
+
+    //https://github.com/nyartech/hyperpay/blob/main/android/src/main/kotlin/com/nyartech/hyperpay/HyperpayPlugin.kt
+    //https://wordpresshyperpay.docs.oppwa.com/reference/parameters#testing
+    //https://peachpayments.docs.oppwa.com/msdk/ios-docs/
+    //https://peachpayments.docs.oppwa.com/msdk/android-docs/index.html
+    //https://wordpresshyperpay.docs.oppwa.com/tutorials/mobile-sdk/custom-ui/asynchronous-payments
+    //https://github.com/cph-cachet/flutter-plugins/blob/master/packages/esense_flutter/ios/Classes/SwiftEsenseFlutterPlugin.swift
+    try {
+      var checkoutId =
+          await FlutterOppwa.getTestCheckoutId(19, "USD", PaymentType.debit);
+      print("checkoutId: $checkoutId");
+      if (checkoutId == null) return;
+      // var result1 = await FlutterOppwa.initialize(ProviderMode.test);
+      // print(result1);
+      var result2 = await FlutterOppwa.requestCheckouInfo(checkoutId);
+      print(result2?.toMap());
+      if (result2 != null && result2.resourcePath != null) {
+        // var result3 = await FlutterOppwa.submitCardTransaction(CardTransaction(
+        //   checkoutId: checkoutId,
+        //   brand: "VISA",
+        //   number: FlutterOppwa.visa3dEnrolled,
+        //   holder: "Test Person",
+        //   cvv: "456",
+        //   expiryMonth: "10",
+        //   expiryYear: "2022",
+        //   tokenize: true,
+        // ));
+        // print(result3?.toMap());
+        var result4 =
+            await FlutterOppwa.requestTestPaymentStatus(result2.resourcePath!);
+        print(result4);
+      }
+    } on FlutterOppwaException catch (e) {
+      if (e.paymentError != null) {
+        print("[${e.paymentError!.code}] ${e.paymentError!.message}");
+      }
+      print("[${e.errorCode}] ${e.errorMessage}");
+    }
   }
 }
