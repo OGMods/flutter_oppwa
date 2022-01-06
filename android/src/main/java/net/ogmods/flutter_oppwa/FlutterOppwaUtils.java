@@ -113,6 +113,45 @@ class FlutterOppwaUtils {
         return map;
     }
 
+    public enum FlutterProviderMode {
+        test(0, Connect.ProviderMode.TEST),
+        live(1, Connect.ProviderMode.LIVE);
+
+        private final int index;
+        private final Connect.ProviderMode value;
+
+        FlutterProviderMode(final int index, final Connect.ProviderMode value) {
+            this.index = index;
+            this.value = value;
+        }
+
+        public static Connect.ProviderMode fromIndex(int index) {
+            for (FlutterProviderMode e : values()) {
+                if (e.index == index) return e.value;
+            }
+            return null;
+        }
+    }
+
+    public enum FlutterSTCPayVerificationOption {
+        mobilePhone(0, STCPayVerificationOption.MOBILE_PHONE),
+        qrCode(1, STCPayVerificationOption.QR_CODE);
+
+        private final int index;
+        private final STCPayVerificationOption value;
+
+        FlutterSTCPayVerificationOption(final int index, final STCPayVerificationOption value) {
+            this.index = index;
+            this.value = value;
+        }
+
+        public static Integer findIndex(STCPayVerificationOption value) {
+            for (FlutterSTCPayVerificationOption e : values()) {
+                if (e.value.equals(value)) return e.index;
+            }
+            return null;
+        }
+    }
 
     public enum FlutterTransactionType {
         sync(0, TransactionType.SYNC),
@@ -178,45 +217,6 @@ class FlutterOppwaUtils {
         }
     }
 
-    public enum FlutterProviderMode {
-        test(0, Connect.ProviderMode.TEST),
-        live(1, Connect.ProviderMode.LIVE);
-
-        private final int index;
-        private final Connect.ProviderMode value;
-
-        FlutterProviderMode(final int index, final Connect.ProviderMode value) {
-            this.index = index;
-            this.value = value;
-        }
-
-        public static Connect.ProviderMode fromIndex(int index) {
-            for (FlutterProviderMode e : values()) {
-                if (e.index == index) return e.value;
-            }
-            return null;
-        }
-    }
-
-    public enum FlutterSTCPayVerificationOption {
-        mobilePhone(0, STCPayVerificationOption.MOBILE_PHONE),
-        qrCode(1, STCPayVerificationOption.QR_CODE);
-
-        private final int index;
-        private final STCPayVerificationOption value;
-
-        FlutterSTCPayVerificationOption(final int index, final STCPayVerificationOption value) {
-            this.index = index;
-            this.value = value;
-        }
-
-        public static Integer findIndex(STCPayVerificationOption value) {
-            for (FlutterSTCPayVerificationOption e : values()) {
-                if (e.value.equals(value)) return e.index;
-            }
-            return null;
-        }
-    }
 
     public enum FlutterAuthStatus {
         authenticated(0, ThreeDS2Info.AuthStatus.AUTHENTICATED),

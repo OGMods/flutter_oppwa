@@ -61,7 +61,7 @@ public class FlutterOppwaPlugin implements FlutterPlugin, MethodCallHandler, Act
                     handleCheckoutInfoRequest(call, result);
                     break;
                 default:
-                    throw new FlutterOppwaException("invalid_methods", "there is no method with the name " + call.method, null);
+                    throw new FlutterOppwaException("invalid_method", "there is no method with the name " + call.method, null);
             }
         } catch (FlutterOppwaException e) {
             result.error(e.getErrorCode(), e.getMessage(), null);
@@ -131,7 +131,7 @@ public class FlutterOppwaPlugin implements FlutterPlugin, MethodCallHandler, Act
         }
         T value = call.argument(name);
         if (!nullable && value == null) {
-            throw new FlutterOppwaException("invalid_arguments", name + " should not be null", null);
+            throw new FlutterOppwaException("invalid_arguments", name + " can not be null", null);
         }
         return value;
     }

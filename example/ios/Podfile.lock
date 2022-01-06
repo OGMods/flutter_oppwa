@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_oppwa (3.10.0):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - flutter_oppwa (from `.symlinks/plugins/flutter_oppwa/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  flutter_oppwa:
+    :path: ".symlinks/plugins/flutter_oppwa/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  flutter_oppwa: a48780fa8280174e0999710e2702d8190a132170
+
+PODFILE CHECKSUM: e014cb44068d09207bd8e4bf9e29922bf5fc2042
+
+COCOAPODS: 1.11.2

@@ -56,7 +56,7 @@ class FlutterOppwa {
     }
   }
 
-  static Future<CheckoutInfo?> requestCheckouInfo(String checkoutId) async {
+  static Future<CheckoutInfo?> requestCheckoutInfo(String checkoutId) async {
     try {
       final Map<String, dynamic>? result = await _channel
           .invokeMapMethod('checkout_info_request', {"checkoutId": checkoutId});
