@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:flutter_oppwa/flutter_oppwa.dart';
 
 void main() {
@@ -48,35 +45,52 @@ class _MyAppState extends State<MyApp> {
     //https://wordpresshyperpay.docs.oppwa.com/tutorials/mobile-sdk/custom-ui/asynchronous-payments
     //https://github.com/cph-cachet/flutter-plugins/blob/master/packages/esense_flutter/ios/Classes/SwiftEsenseFlutterPlugin.swift
     try {
-      // var checkoutId =
-      //     await FlutterOppwa.getTestCheckoutId(19, "USD", PaymentType.debit);
-      // print("checkoutId: $checkoutId");
-      // if (checkoutId == null) return;
-      var result1 = await FlutterOppwa.initialize(ProviderMode.test);
-      print(result1);
-      // var result2 = await FlutterOppwa.requestCheckoutInfo(checkoutId);
-      // print(result2?.toMap());
-      // if (result2 != null && result2.resourcePath != null) {
-      //   //  var result3 = await FlutterOppwa.submitCardTransaction(CardTransaction(
-      //   //   checkoutId: checkoutId,
-      //   //   brand: "VISA",
-      //   //   number: FlutterOppwa.visa3dEnrolled,
-      //   //   holder: "Test Person",
-      //   //   cvv: "456",
-      //   //   expiryMonth: "10",
-      //   //   expiryYear: "2022",
-      //   //   tokenize: true,
-      //   // ));
-      //   // print(result3?.toMap());
-      //   var result4 =
-      //       await FlutterOppwa.requestTestPaymentStatus(result2.resourcePath!);
-      //   print(result4);
-      // }
+      // var status = await FlutterOppwaTest.requestPaymentStatus(
+      //     "/v1/checkouts/40CD0EDDF5DF8040B79EF3BB7A6F6FB3.uat01-vm-tx04/payment");
+      // return;
+      var checkoutId = await FlutterOppwaTest.requestCheckoutId(9.99, "SAR",
+          type: PaymentType.debit);
+      // var checkoutId = "618FDDB9E8CEF6E3A761B1683012D7A2.uat01-vm-tx02";
+      if (checkoutId == null) return;
+      print("checkoutId: $checkoutId");
+      // CF235EA2904A97E845381E95EA6856A1.uat01-vm-tx03
+      var didInitialize = await FlutterOppwa.initialize(ProviderMode.test);
+      if (didInitialize) {
+        var checkoutInfo = await FlutterOppwa.requestCheckoutInfo(checkoutId);
+        print("resourcePath: ${checkoutInfo?.resourcePath}");
+        if (checkoutInfo != null && checkoutInfo.resourcePath != null) {
+          // var transaction = await FlutterOppwa.submitCardTransaction(
+          //   CardTransaction(
+          //     checkoutId: checkoutId,
+          //     // brand: "VISA",
+          //     number: FlutterOppwaTest.visa3dEnrolled,
+          //     holder: "Test Person",
+          //     cvv: "456",
+          //     expiryMonth: "10",
+          //     expiryYear: "2025",
+          //     tokenize: true,
+          //   ),
+          // );
+          var transaction = await FlutterOppwa.submitSTCTransaction(
+            STCTransaction(
+              checkoutId: checkoutId,
+              verificationOption: STCPayVerificationOption.mobilePhone,
+            ),
+          );
+          var status = await FlutterOppwaTest.requestPaymentStatus(
+              checkoutInfo.resourcePath!);
+          print(status);
+        }
+      } else {
+        print("Not Initialized");
+      }
     } on FlutterOppwaException catch (e) {
       if (e.paymentError != null) {
         print("[${e.paymentError!.code}] ${e.paymentError!.message}");
       }
       print("[${e.errorCode}] ${e.errorMessage}");
+    } catch (e) {
+      print(e);
     }
   }
 }

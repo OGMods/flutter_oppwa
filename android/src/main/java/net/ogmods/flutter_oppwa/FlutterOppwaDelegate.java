@@ -67,22 +67,22 @@ class FlutterOppwaDelegate extends CustomTabsServiceConnection implements ITrans
 
     @Override
     public void paymentConfigRequestSucceeded(@NonNull CheckoutInfo checkoutInfo) {
-        success(FlutterOppwaUtils.convertCheckoutInfoToMap(checkoutInfo));
+        success(FlutterOppwaUtils.toJson(checkoutInfo));
     }
 
     @Override
     public void paymentConfigRequestFailed(@NonNull PaymentError paymentError) {
-        error("payment_error", "config request failed", FlutterOppwaUtils.convertPaymentErrorToMap(paymentError));
+        error("payment_error", "config request failed", FlutterOppwaUtils.toJson(paymentError));
     }
 
     @Override
     public void transactionCompleted(@NonNull Transaction transaction) {
         if (transaction.getTransactionType() == TransactionType.SYNC) {
-            success(FlutterOppwaUtils.convertTransactionToMap(transaction));
+            success(FlutterOppwaUtils.toJson(transaction));
         } else {
             if (transaction.getRedirectUrl() == null) {
                 Map<String, Object> details = new HashMap<>();
-                details.put("transaction", FlutterOppwaUtils.convertTransactionToMap(transaction));
+                details.put("transaction", FlutterOppwaUtils.toJson(transaction));
                 error("invalid_transaction", "the transaction type was async but the redirect url was null", details);
                 return;
             }
@@ -93,8 +93,8 @@ class FlutterOppwaDelegate extends CustomTabsServiceConnection implements ITrans
 
     @Override
     public void transactionFailed(@NonNull Transaction transaction, @NonNull PaymentError paymentError) {
-        Map<String, Object> details = FlutterOppwaUtils.convertPaymentErrorToMap(paymentError);
-        details.put("transaction", FlutterOppwaUtils.convertTransactionToMap(transaction));
+        Map<String, Object> details = FlutterOppwaUtils.toJson(paymentError);
+        details.put("transaction", FlutterOppwaUtils.toJson(transaction));
         error("payment_error", "transaction failed", details);
     }
 
@@ -118,10 +118,10 @@ class FlutterOppwaDelegate extends CustomTabsServiceConnection implements ITrans
                 Log.w("flutter_oppwa", "onNavigationEvent: Code = " + navigationEvent);
                 if (navigationEvent == TAB_HIDDEN) {
                     if (didRedirect) {
-                        success(FlutterOppwaUtils.convertTransactionToMap(transaction));
+                        success(FlutterOppwaUtils.toJson(transaction));
                     } else {
                         Map<String, Object> details = new HashMap<>();
-                        details.put("transaction", FlutterOppwaUtils.convertTransactionToMap(transaction));
+                        details.put("transaction", FlutterOppwaUtils.toJson(transaction));
                         error("payment_canceled", "the payment was canceled", details);
                     }
                     binding.getActivity().getApplicationContext().unbindService(FlutterOppwaDelegate.this);

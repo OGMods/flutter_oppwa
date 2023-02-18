@@ -1,40 +1,24 @@
 enum PaymentType {
   ///A stand-alone authorisation that will also trigger optional risk management and validation. A Capture (CP) with reference to the Preauthorisation (PA) will confirm the payment..
-  preauthorization,
+  preauthorization("PA"),
 
   ///Debits the account of the end customer and credits the merchant account.
-  debit,
+  debit("DB"),
 
   ///Credits the account of the end customer and debits the merchant account.
-  credit,
+  credit("CD"),
 
   ///Captures a preauthorized (PA) amount.
-  capture,
+  capture("CP"),
 
   ///Reverses an already processed Preauthorization (PA), Debit (DB) or Credit (CD) transaction. As a consequence, the end customer will never see any booking on his statement. A Reversal is only possible until a connector specific cut-off time. Some connectors don't support Reversals.
-  reversal,
+  reversal("RV"),
 
   ///Credits the account of the end customer with a reference to a prior Debit (DB) or Credit (CD) transaction. The end customer will always see two bookings on his statement. Some connectors do not support Refunds.
-  refund,
-}
+  refund("RF");
 
-extension PaymentTypeExtension on PaymentType {
-  String get value {
-    switch (this) {
-      case PaymentType.preauthorization:
-        return "PA";
-      case PaymentType.debit:
-        return "DB";
-      case PaymentType.credit:
-        return "CD";
-      case PaymentType.capture:
-        return "CP";
-      case PaymentType.reversal:
-        return "RV";
-      case PaymentType.refund:
-        return "RF";
-    }
-  }
+  final String value;
+  const PaymentType(this.value);
 }
 
 enum CheckoutThreeDS2Flow {
@@ -75,4 +59,54 @@ enum AuthStatus {
   rejected,
   failed,
   informationalOnly,
+}
+
+enum CVVMode {
+  none,
+  optional,
+  required,
+}
+
+enum ErrorCode {
+  errorCodePaymentParamsInvalid,
+  errorCodePaymentParamsCheckoutIdInvalid,
+  errorCodePaymentParamsPaymentBrandInvalid,
+  errorCodePaymentParamsTokenInvalid,
+  errorCodePaymentParamsTokenizationUnsupported,
+  errorCodePaymentParamsCardHolderInvalid,
+  errorCodePaymentParamsCardNumberInvalid,
+  errorCodePaymentParamsCardBrandInvalid,
+  errorCodePaymentParamsCardMonthInvalid,
+  errorCodePaymentParamsCardYearInvalid,
+  errorCodePaymentParamsCardExpired,
+  errorCodePaymentParamsCardCvvInvalid,
+  errorCodePaymentParamsBankAccountHolderInvalid,
+  errorCodePaymentParamsBankAccountIbanInvalid,
+  errorCodePaymentParamsBankAccountCountryInvalid,
+  errorCodePaymentParamsBankAccountBankNameInvalid,
+  errorCodePaymentParamsBankAccountNumberInvalid,
+  errorCodePaymentParamsBankAccountBicInvalid,
+  errorCodePaymentParamsBankAccountBankCodeInvalid,
+  errorCodePaymentParamsMobilePhoneInvalid,
+  errorCodePaymentParamsCountryCodeInvalid,
+  errorCodePaymentParamsEmailInvalid,
+  errorCodePaymentParamsNationalIdentifierInvalid,
+  errorCodePaymentParamsAccountVerificationInvalid,
+  errorCodePaymentParamsPaymentTokenMissing,
+  errorCodePaymentProviderNotInitialized,
+  errorCodePaymentProviderInternalError,
+  errorCodePaymentProviderSecurityInvalidChecksum,
+  errorCodePaymentProviderSecuritySslValidationFailed,
+  errorCodePaymentProviderConnectionFailure,
+  errorCodePaymentProviderConnectionMalformedResponse,
+  errorCodeNoAvailablePaymentMethods,
+  errorCodePaymentMethodNotAvailable,
+  errorCodeCheckoutSettingsMissed,
+  errorCodeTransactionAborted,
+  errorCodeUnexpectedException,
+  errorCodeGooglepay,
+  errorCodeKlarnaInline,
+  errorCodeBancontactLink,
+  errorCodeThreeds2Failed,
+  errorCodeThreeds2Canceled,
 }

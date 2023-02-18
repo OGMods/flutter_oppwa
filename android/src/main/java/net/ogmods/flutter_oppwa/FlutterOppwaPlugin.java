@@ -1,14 +1,18 @@
 package net.ogmods.flutter_oppwa;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabsClient;
 
 import com.oppwa.mobile.connect.exception.PaymentException;
 import com.oppwa.mobile.connect.payment.card.CardPaymentParams;
-import com.oppwa.mobile.connect.provider.Connect;
+import com.oppwa.mobile.connect.payment.stcpay.STCPayPaymentParams;
+import com.oppwa.mobile.connect.payment.token.TokenPaymentParams;
 import com.oppwa.mobile.connect.provider.Transaction;
+import com.oppwa.mobile.connect.utils.LibraryHelper;
 
-import androidx.browser.customtabs.CustomTabsClient;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -27,7 +31,7 @@ public class FlutterOppwaPlugin implements FlutterPlugin, MethodCallHandler, Act
     /// when the Flutter Engine is detached from the Activity
     private MethodChannel channel;
     private ActivityPluginBinding binding;
-    private Connect.ProviderMode mode;
+    private FlutterEnums.FlutterProviderMode mode;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -44,21 +48,35 @@ public class FlutterOppwaPlugin implements FlutterPlugin, MethodCallHandler, Act
         try {
             switch (call.method) {
                 case "initialize":
-                    int mode = getArgument(call, "mode");
-                    this.mode = FlutterOppwaUtils.FlutterProviderMode.fromIndex(mode);
+                    String mode = getArgument(call, "mode");
+                    this.mode = FlutterEnums.find(FlutterEnums.FlutterProviderMode.values(), mode);
                     if (this.mode == null) {
-                        throwInvalid("mode", Integer.toString(mode));
+                        throwInvalid("mode", mode);
                     }
-                   boolean didInitialize = CustomTabsClient.connectAndInitialize(binding.getActivity(), FlutterOppwaUtils.getPackageName(binding.getActivity()));
+                    boolean didInitialize = CustomTabsClient.connectAndInitialize(binding.getActivity(), FlutterOppwaUtils.getPackageName(binding.getActivity()));
                     result.success(didInitialize);
                     break;
                 case "card_transaction":
                     checkInitialized();
                     handleCardTransaction(call, result);
                     break;
+                case "stc_transaction":
+                    checkInitialized();
+                    handleSTCTransaction(call, result);
+                    break;
+                case "token_transaction":
+                    checkInitialized();
+                    handleTokenTransaction(call, result);
+                    break;
                 case "checkout_info_request":
                     checkInitialized();
                     handleCheckoutInfoRequest(call, result);
+                    break;
+                case "isPlayServicesWalletAvailable":
+                    result.success(LibraryHelper.isPlayServicesWalletAvailable);
+                    break;
+                case "isPlayServicesBaseAvailable":
+                    result.success(LibraryHelper.isPlayServicesBaseAvailable);
                     break;
                 default:
                     throw new FlutterOppwaException("invalid_method", "there is no method with the name " + call.method, null);
@@ -66,14 +84,14 @@ public class FlutterOppwaPlugin implements FlutterPlugin, MethodCallHandler, Act
         } catch (FlutterOppwaException e) {
             result.error(e.getErrorCode(), e.getMessage(), null);
         } catch (PaymentException e) {
-            result.error("payment_error", e.getMessage(), FlutterOppwaUtils.convertPaymentExceptionToMap(e));
+            result.error("payment_error", e.getMessage(), FlutterOppwaUtils.toJson(e));
         } catch (Exception e) {
             result.error("unhandled_exception", e.getMessage(), null);
         }
     }
 
     public void handleCardTransaction(@NonNull MethodCall call, @NonNull Result result) throws Exception {
-        FlutterOppwaDelegate delegate = new FlutterOppwaDelegate(binding, this.mode, result);
+        FlutterOppwaDelegate delegate = new FlutterOppwaDelegate(binding, this.mode.getValue(), result);
         String checkoutId = getArgument(call, "checkoutId");
         String number = getArgument(call, "number");
         String brand = getNullableArgument(call, "brand");
@@ -95,9 +113,40 @@ public class FlutterOppwaPlugin implements FlutterPlugin, MethodCallHandler, Act
         Transaction transaction = new Transaction(paymentParams);
         delegate.submitTransaction(transaction);
     }
-
+    public void handleTokenTransaction(@NonNull MethodCall call, @NonNull Result result) throws Exception {
+        FlutterOppwaDelegate delegate = new FlutterOppwaDelegate(binding, this.mode.getValue(), result);
+        String checkoutId = getArgument(call, "checkoutId");
+        String tokenId = getArgument(call, "tokenId");
+        String brand = getArgument(call, "brand");
+        String cvv = getNullableArgument(call, "cvv");
+        TokenPaymentParams paymentParams;
+        if (cvv != null) {
+            paymentParams = new TokenPaymentParams(checkoutId, tokenId, brand, cvv);
+        }else {
+            paymentParams = new TokenPaymentParams(checkoutId, tokenId, brand);
+        }
+        Transaction transaction = new Transaction(paymentParams);
+        delegate.submitTransaction(transaction);
+    }
+    public void handleSTCTransaction(@NonNull MethodCall call, @NonNull Result result) throws Exception {
+        FlutterOppwaDelegate delegate = new FlutterOppwaDelegate(binding, this.mode.getValue(), result);
+        String checkoutId = getArgument(call, "checkoutId");
+        String option = getArgument(call, "verificationOption");
+        String mobile = getNullableArgument(call, "mobile");
+        FlutterEnums.FlutterSTCPayVerificationOption verificationOption = FlutterEnums.find(
+                FlutterEnums.FlutterSTCPayVerificationOption.values(),
+                option
+        );
+        if(verificationOption == null) {
+            throw new FlutterOppwaException("invalid_arguments", "verificationOption can not be null", null);
+        }
+        STCPayPaymentParams paymentParams = new STCPayPaymentParams(checkoutId, verificationOption.getValue());
+        paymentParams.setMobilePhoneNumber(mobile);;
+        Transaction transaction = new Transaction(paymentParams);
+        delegate.submitTransaction(transaction);
+    }
     public void handleCheckoutInfoRequest(@NonNull MethodCall call, @NonNull Result result) throws Exception {
-        FlutterOppwaDelegate delegate = new FlutterOppwaDelegate(binding, this.mode, result);
+        FlutterOppwaDelegate delegate = new FlutterOppwaDelegate(binding, this.mode.getValue(), result);
         String checkoutId = getArgument(call, "checkoutId");
         delegate.requestCheckoutInfo(checkoutId);
     }

@@ -1,20 +1,94 @@
 import 'enums.dart';
+import 'parser.dart';
 
-List<String>? _parseList(dynamic value) {
-  if (value != null) {
-    return value.toString().split("_flutter-oppwa_");
+class BaseTransaction {
+  final String checkoutId;
+
+  BaseTransaction({required this.checkoutId});
+
+  Map<String, dynamic> toMap() {
+    return {
+      "checkoutId": checkoutId,
+    };
   }
 }
 
-Map<String, dynamic>? _parseMap(dynamic value) {
-  if (value != null && value is Map<Object?, Object?>) {
-    return value.cast<String, dynamic>();
+class CardTransaction extends BaseTransaction {
+  final String number;
+  final String? brand;
+  final String? holder;
+  final String? expiryMonth;
+  final String? expiryYear;
+  final String? cvv;
+  final bool? tokenize;
+
+  CardTransaction({
+    required super.checkoutId,
+    required this.number,
+    this.brand,
+    this.holder,
+    this.expiryMonth,
+    this.expiryYear,
+    this.cvv,
+    this.tokenize,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...super.toMap(),
+      "number": number,
+      "brand": brand,
+      "holder": holder,
+      "expiryMonth": expiryMonth,
+      "expiryYear": expiryYear,
+      "cvv": cvv,
+      "tokenize": tokenize,
+    }..removeWhere((key, value) => value == null);
   }
 }
 
-T? _parseMapTo<T>(dynamic value, T Function(Map<String, dynamic> map) parser) {
-  var map = _parseMap(value);
-  if (map != null) return parser(map);
+class STCTransaction extends BaseTransaction {
+  final String? mobile;
+  final STCPayVerificationOption verificationOption;
+
+  STCTransaction({
+    required super.checkoutId,
+    required this.verificationOption,
+    this.mobile,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...super.toMap(),
+      "mobile": mobile,
+      "verificationOption": verificationOption.name,
+    }..removeWhere((key, value) => value == null);
+  }
+}
+
+class TokenTransaction extends BaseTransaction {
+  final String tokenId;
+  final String brand;
+  final String? cvv;
+
+  TokenTransaction({
+    required super.checkoutId,
+    required this.tokenId,
+    required this.brand,
+    this.cvv,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...super.toMap(),
+      "tokenId": tokenId,
+      "brand": brand,
+      "cvv": cvv,
+    }..removeWhere((key, value) => value == null);
+  }
 }
 
 class CheckoutInfo {
@@ -26,120 +100,61 @@ class CheckoutInfo {
   final String? resourcePath;
   final List<String>? threeDs2Brands;
   final CheckoutThreeDS2Flow? threeDs2Flow;
-  final String? tokens;
-  CheckoutInfo({
-    this.amount,
-    this.brands,
-    this.currencyCode,
-    this.endpoint,
-    this.klarnaMerchantIds,
-    this.resourcePath,
-    this.threeDs2Brands,
-    this.threeDs2Flow,
-    this.tokens,
-  });
+  final List<Token>? tokens;
 
-  factory CheckoutInfo.fromMap(Map<Object?, Object?> map) {
-    return CheckoutInfo(
-      amount: double.tryParse((map['endpoint'] as String?) ?? ""),
-      brands: _parseList(map['brands']),
-      currencyCode: map['currencyCode'] as String?,
-      endpoint: map['endpoint'] as String?,
-      klarnaMerchantIds: _parseList(map['klarnaMerchantIds']),
-      resourcePath: map['resourcePath'] as String?,
-      threeDs2Brands: _parseList(map['threeDs2Brands']),
-      threeDs2Flow: map['threeDs2Flow'] != null
-          ? CheckoutThreeDS2Flow.values[map['threeDs2Flow']! as int]
-          : null,
-      tokens: map['tokens'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      "amount": amount,
-      "brands": brands,
-      "currencyCode": currencyCode,
-      "endpoint": endpoint,
-      "klarnaMerchantIds": klarnaMerchantIds,
-      "resourcePath": resourcePath,
-      "threeDs2Brands": threeDs2Brands,
-      "threeDs2Flow": threeDs2Flow?.name,
-      "tokens": tokens,
-    };
-  }
+  CheckoutInfo.fromMap(Map<String, dynamic> map)
+      : amount = map.getNullableValue("amount"),
+        brands = map.castNullableList("brands"),
+        currencyCode = map.getNullableValue("currencyCode"),
+        endpoint = map.getNullableValue("endpoint"),
+        klarnaMerchantIds = map.castNullableList("klarnaMerchantIds"),
+        resourcePath = map.getNullableValue("resourcePath"),
+        threeDs2Brands = map.castNullableList("threeDs2Brands"),
+        threeDs2Flow =
+            map.getNullableEnum(CheckoutThreeDS2Flow.values, "threeDs2Flow"),
+        tokens = map.parseNullableList("tokens", Token.fromMap);
 }
 
 class Transaction {
-  final PaymentParams? paymentParams;
   final TransactionType? transactionType;
-  final String? redirectUrl;
-  final String? threeDS2MethodRedirectUrl;
+  final Map<String, String>? brandSpecificInfo;
+  final PaymentParams? paymentParams;
   final ThreeDS2Info? threeDS2Info;
   final YooKassaInfo? yooKassaInfo;
-  final Map<String, String>? brandSpecificInfo;
+  final String? redirectUrl;
+  final String? threeDS2MethodRedirectUrl;
 
-  Transaction({
-    this.paymentParams,
-    this.transactionType,
-    this.redirectUrl,
-    this.threeDS2MethodRedirectUrl,
-    this.threeDS2Info,
-    this.yooKassaInfo,
-    this.brandSpecificInfo,
-  });
-
-  factory Transaction.fromMap(Map<Object?, Object?> map) {
-    return Transaction(
-      paymentParams: _parseMapTo(
-          map['paymentParams'], (map) => PaymentParams.fromMap(map)),
-      transactionType: map['transactionType'] != null
-          ? TransactionType.values[map['transactionType']! as int]
-          : null,
-      redirectUrl: map['redirectUrl'] as String?,
-      threeDS2MethodRedirectUrl: map['threeDS2MethodRedirectUrl'] as String?,
-      threeDS2Info:
-          _parseMapTo(map['threeDS2Info'], (map) => ThreeDS2Info.fromMap(map)),
-      yooKassaInfo:
-          _parseMapTo(map['yooKassaInfo'], (map) => YooKassaInfo.fromMap(map)),
-      brandSpecificInfo: (map['brandSpecificInfo'] as Map<Object?, Object?>?)
-          ?.cast<String, String>(),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      "paymentParams": paymentParams?.toMap(),
-      "transactionType": transactionType?.name,
-      "redirectUrl": redirectUrl,
-      "threeDS2MethodRedirectUrl": threeDS2MethodRedirectUrl,
-      "threeDS2Info": threeDS2Info?.toMap(),
-      "yooKassaInfo": yooKassaInfo?.toMap(),
-      "brandSpecificInfo": brandSpecificInfo,
-    };
-  }
+  Transaction.fromMap(Map<String, dynamic> map)
+      : transactionType =
+            map.getNullableEnum(TransactionType.values, "transactionType"),
+        brandSpecificInfo = map.castNullableMap("brandSpecificInfo"),
+        paymentParams =
+            map.parseNullableValue("paymentParams", PaymentParams.parse),
+        threeDS2Info =
+            map.parseNullableValue("threeDS2Info", ThreeDS2Info.fromMap),
+        yooKassaInfo =
+            map.parseNullableValue("yooKassaInfo", YooKassaInfo.fromMap),
+        redirectUrl = map.getNullableValue("redirectUrl"),
+        threeDS2MethodRedirectUrl =
+            map.getNullableValue("threeDS2MethodRedirectUrl");
 }
 
 class ThreeDS2Info {
   final AuthStatus? authStatus;
   final String? authResponse;
+  final String? callbackUrl;
+  final String? cardHolderInfo;
+  final String? challengeCompletionCallbackUrl;
+  final String? protocolVersion;
 
-  ThreeDS2Info({this.authStatus, this.authResponse});
-
-  factory ThreeDS2Info.fromMap(Map<Object?, Object?> map) {
-    return ThreeDS2Info(
-      authStatus: map['authStatus'] != null
-          ? AuthStatus.values[map['authStatus']! as int]
-          : null,
-      authResponse: map['authResponse'] as String?,
-    );
-  }
-  Map<String, dynamic> toMap() {
-    return {
-      "authStatus": authStatus?.name,
-      "authResponse": authResponse,
-    };
-  }
+  ThreeDS2Info.fromMap(Map<String, dynamic> map)
+      : authStatus = map.getNullableEnum(AuthStatus.values, "authStatus"),
+        authResponse = map.getNullableValue("authResponse"),
+        callbackUrl = map.getNullableValue("callbackUrl"),
+        cardHolderInfo = map.getNullableValue("cardHolderInfo"),
+        challengeCompletionCallbackUrl =
+            map.getNullableValue("challengeCompletionCallbackUrl"),
+        protocolVersion = map.getNullableValue("protocolVersion");
 }
 
 class PaymentParams {
@@ -147,22 +162,92 @@ class PaymentParams {
   final String? paymentBrand;
   final String? shopperResultUrl;
 
-  PaymentParams({this.checkoutId, this.paymentBrand, this.shopperResultUrl});
+  PaymentParams.fromMap(Map<String, dynamic> map)
+      : checkoutId = map.getNullableValue("checkoutId"),
+        paymentBrand = map.getNullableValue("paymentBrand"),
+        shopperResultUrl = map.getNullableValue("shopperResultUrl");
 
-  factory PaymentParams.fromMap(Map<Object?, Object?> map) {
-    return PaymentParams(
-      checkoutId: map['checkoutId'] as String?,
-      paymentBrand: map['paymentBrand'] as String?,
-      shopperResultUrl: map['shopperResultUrl'] as String?,
-    );
+  static PaymentParams parse(Map<String, dynamic> map) {
+    var typename = map.getNullableValue("__typename__");
+    if (typename == "CardPaymentParams") {
+      return CardPaymentParams.fromMap(map);
+    } else if (typename == "STCPayPaymentParams") {
+      return STCPayPaymentParams.fromMap(map);
+    } else if (typename == "TokenPaymentParams") {
+      return TokenPaymentParams.fromMap(map);
+    } else {
+      return PaymentParams.fromMap(map);
+    }
   }
-  Map<String, dynamic> toMap() {
-    return {
-      "checkoutId": checkoutId,
-      "paymentBrand": paymentBrand,
-      "shopperResultUrl": shopperResultUrl,
-    };
-  }
+}
+
+class BaseCardPaymentParams extends PaymentParams {
+  final String? cvv;
+  final String? threeDS2AuthParams;
+  final int? numberOfInstallments;
+
+  BaseCardPaymentParams.fromMap(Map<String, dynamic> map)
+      : cvv = map.getNullableValue("cvv"),
+        threeDS2AuthParams = map.getNullableValue("threeDS2AuthParams"),
+        numberOfInstallments = map.getNullableValue("numberOfInstallments"),
+        super.fromMap(map);
+}
+
+class STCPayPaymentParams extends PaymentParams {
+  final String? mobilePhoneNumber;
+  final STCPayVerificationOption? verificationOption;
+
+  STCPayPaymentParams.fromMap(Map<String, dynamic> map)
+      : mobilePhoneNumber = map.getNullableValue("mobilePhoneNumber"),
+        verificationOption = map.getNullableEnum(
+            STCPayVerificationOption.values, "verificationOption"),
+        super.fromMap(map);
+}
+
+class CardPaymentParams extends BaseCardPaymentParams {
+  final String? number;
+  final String? holder;
+  final String? expiryMonth;
+  final String? expiryYear;
+  final String? mobilePhone;
+  final String? countryCode;
+  final BillingAddress? billingAddress;
+
+  CardPaymentParams.fromMap(Map<String, dynamic> map)
+      : number = map.getNullableValue("number"),
+        holder = map.getNullableValue("holder"),
+        expiryMonth = map.getNullableValue("expiryMonth"),
+        expiryYear = map.getNullableValue("expiryYear"),
+        mobilePhone = map.getNullableValue("mobilePhone"),
+        countryCode = map.getNullableValue("countryCode"),
+        billingAddress =
+            map.parseNullableValue("billingAddress", BillingAddress.fromMap),
+        super.fromMap(map);
+}
+
+class TokenPaymentParams extends BaseCardPaymentParams {
+  final String? tokenId;
+
+  TokenPaymentParams.fromMap(Map<String, dynamic> map)
+      : tokenId = map.getNullableValue("tokenId"),
+        super.fromMap(map);
+}
+
+class BillingAddress {
+  final String? country;
+  final String? state;
+  final String? city;
+  final String? postCode;
+  final String? street1;
+  final String? street2;
+
+  BillingAddress.fromMap(Map<String, dynamic> map)
+      : country = map.getNullableValue("country"),
+        state = map.getNullableValue("state"),
+        city = map.getNullableValue("city"),
+        postCode = map.getNullableValue("postCode"),
+        street1 = map.getNullableValue("street1"),
+        street2 = map.getNullableValue("street2");
 }
 
 class YooKassaInfo {
@@ -170,24 +255,10 @@ class YooKassaInfo {
   final String? confirmationUrl;
   final String? callbackUrl;
 
-  YooKassaInfo({this.status, this.confirmationUrl, this.callbackUrl});
-
-  factory YooKassaInfo.fromMap(Map<Object?, Object?> map) {
-    return YooKassaInfo(
-      status: map['status'] != null
-          ? YooKassaStatus.values[map['status']! as int]
-          : null,
-      confirmationUrl: map['confirmationUrl'] as String?,
-      callbackUrl: map['callbackUrl'] as String?,
-    );
-  }
-  Map<String, dynamic> toMap() {
-    return {
-      "status": status?.name,
-      "confirmationUrl": confirmationUrl,
-      "callbackUrl": callbackUrl,
-    };
-  }
+  YooKassaInfo.fromMap(Map<String, dynamic> map)
+      : status = map.getNullableEnum(YooKassaStatus.values, "status"),
+        confirmationUrl = map.getNullableValue("confirmationUrl"),
+        callbackUrl = map.getNullableValue("callbackUrl");
 }
 
 class FlutterOppwaException {
@@ -203,63 +274,87 @@ class FlutterOppwaException {
 }
 
 class PaymentError {
-  final String? code;
+  final ErrorCode? code;
   final String? message;
   final String? info;
   final Transaction? transaction;
 
-  PaymentError({this.code, this.message, this.info, this.transaction});
-
-  factory PaymentError.fromMap(Map<Object?, Object?> map) {
-    return PaymentError(
-      code: map['code'] as String?,
-      message: map['message'] as String?,
-      info: map['info'] as String?,
-      transaction:
-          _parseMapTo(map['transaction'], (map) => Transaction.fromMap(map)),
-    );
-  }
-  Map<String, dynamic> toMap() {
-    return {
-      "code": code,
-      "message": message,
-      "info": info,
-      "transaction": transaction?.toMap(),
-    };
-  }
+  PaymentError.fromMap(Map<String, dynamic> map)
+      : code = map.getNullableEnum(ErrorCode.values, "code"),
+        message = map.getNullableValue("message"),
+        info = map.getNullableValue("info"),
+        transaction =
+            map.parseNullableValue("transaction", Transaction.fromMap);
 }
 
-class CardTransaction {
-  final String checkoutId;
-  final String number;
-  final String? brand;
+class Token {
+  final String? tokenId;
+  final String? paymentBrand;
+  final BankAccount? bankAccount;
+  final Card? card;
+  final VirtualAccount? virtualAccount;
+
+  Token.fromMap(Map<String, dynamic> map)
+      : tokenId = map.getNullableValue("tokenId"),
+        paymentBrand = map.getNullableValue("paymentBrand"),
+        bankAccount =
+            map.parseNullableValue("bankAccount", BankAccount.fromMap),
+        card = map.parseNullableValue("card", Card.fromMap),
+        virtualAccount =
+            map.parseNullableValue("virtualAccount", VirtualAccount.fromMap);
+}
+
+class BankAccount {
   final String? holder;
+  final String? iban;
+  BankAccount.fromMap(Map<String, dynamic> map)
+      : holder = map.getNullableValue("holder"),
+        iban = map.getNullableValue("iban");
+}
+
+class Card {
   final String? expiryMonth;
   final String? expiryYear;
-  final String? cvv;
-  final bool? tokenize;
+  final String? holder;
+  final String? last4Digits;
+  Card.fromMap(Map<String, dynamic> map)
+      : expiryMonth = map.getNullableValue("expiryMonth"),
+        expiryYear = map.getNullableValue("expiryYear"),
+        holder = map.getNullableValue("holder"),
+        last4Digits = map.getNullableValue("last4Digits");
+}
 
-  CardTransaction({
-    required this.checkoutId,
-    required this.number,
-    this.brand,
-    this.holder,
-    this.expiryMonth,
-    this.expiryYear,
-    this.cvv,
-    this.tokenize,
-  });
+class VirtualAccount {
+  final String? holder;
+  final String? accountId;
+  VirtualAccount.fromMap(Map<String, dynamic> map)
+      : holder = map.getNullableValue("holder"),
+        accountId = map.getNullableValue("accountId");
+}
 
-  Map<String, dynamic> toMap() {
-    return {
-      "checkoutId": checkoutId,
-      "number": number,
-      "brand": brand,
-      "holder": holder,
-      "expiryMonth": expiryMonth,
-      "expiryYear": expiryYear,
-      "cvv": cvv,
-      "tokenize": tokenize,
-    };
-  }
+class BrandInfo {
+  final String? label;
+  final String? renderType;
+  final String? brand;
+  final CardBrandInfo? cardBrandInfo;
+  BrandInfo.fromMap(Map<String, dynamic> map)
+      : label = map.getNullableValue("label"),
+        renderType = map.getNullableValue("renderType"),
+        brand = map.getNullableValue("brand"),
+        cardBrandInfo =
+            map.parseNullableValue("cardBrandInfo", CardBrandInfo.fromMap);
+}
+
+class CardBrandInfo {
+  final int? cvvLength;
+  final CVVMode? cvvMode;
+  final String? detection;
+  final String? pattern;
+  final String? validation;
+  CardBrandInfo.fromMap(Map<String, dynamic> map)
+      : cvvLength = map.getNullableValue("cvvLength"),
+        cvvMode = map.getNullableEnum(CVVMode.values, "cvvMode"),
+        detection = map.getNullableValue("detection"),
+        pattern = map.getNullableValue("pattern"),
+        validation = map.getNullableValue("validation");
 }
