@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_oppwa/flutter_oppwa.dart';
 
@@ -48,6 +51,47 @@ class _MyAppState extends State<MyApp> {
       // var status = await FlutterOppwaTest.requestPaymentStatus(
       //     "/v1/checkouts/40CD0EDDF5DF8040B79EF3BB7A6F6FB3.uat01-vm-tx04/payment");
       // return;
+      print(
+          "isApplePayAvailable: ${await FlutterOppwaUtils.isApplePayAvailable}");
+      var checkoutId2 = await FlutterOppwaTest.requestCheckoutId(
+        9.99, "SAR",
+        type: PaymentType.debit,
+        // extraParameters: {
+        //   "createRegistration": "true",
+        // },
+      );
+      if (checkoutId2 == null) return;
+      print("checkoutId: $checkoutId2");
+      // var checkoutId2 = "8051B6D1ACFCD3C50F68BBF85630CAED.uat01-vm-tx01";
+      var didInitialize1 = await FlutterOppwa.initialize(ProviderMode.test);
+      print(didInitialize1);
+      // var checkoutInfo2 = await FlutterOppwa.requestCheckoutInfo(
+      //     "DC37E40733653FC62E48BD33E3F6E0B2.uat01-vm-tx01");
+      // print(checkoutInfo2);
+      var transaction = await FlutterOppwa.submitTransaction(
+        CardTransaction(
+          checkoutId: checkoutId2,
+          // brand: "VISA",
+          number: FlutterOppwaTest.visa3dEnrolled,
+          holder: "Test Person",
+          cvv: "456",
+          expiryMonth: "10",
+          expiryYear: "2025",
+          tokenize: true,
+        ),
+      );
+      // var transaction = await FlutterOppwa.submitTokenTransaction(
+      //   TokenTransaction(
+      //     checkoutId: checkoutId2,
+      //     tokenId: "8ac7a4a1866e530201866edd169f3b87",
+      //     brand: "VISA",
+      //     cvv: "456",
+      //   ),
+      // );
+      var status = await FlutterOppwaTest.requestPaymentStatus(
+          "/v1/checkouts/${checkoutId2}/payment");
+      print(status);
+      return;
       var checkoutId = await FlutterOppwaTest.requestCheckoutId(9.99, "SAR",
           type: PaymentType.debit);
       // var checkoutId = "618FDDB9E8CEF6E3A761B1683012D7A2.uat01-vm-tx02";
@@ -59,24 +103,24 @@ class _MyAppState extends State<MyApp> {
         var checkoutInfo = await FlutterOppwa.requestCheckoutInfo(checkoutId);
         print("resourcePath: ${checkoutInfo?.resourcePath}");
         if (checkoutInfo != null && checkoutInfo.resourcePath != null) {
-          // var transaction = await FlutterOppwa.submitCardTransaction(
-          //   CardTransaction(
-          //     checkoutId: checkoutId,
-          //     // brand: "VISA",
-          //     number: FlutterOppwaTest.visa3dEnrolled,
-          //     holder: "Test Person",
-          //     cvv: "456",
-          //     expiryMonth: "10",
-          //     expiryYear: "2025",
-          //     tokenize: true,
-          //   ),
-          // );
-          var transaction = await FlutterOppwa.submitSTCTransaction(
-            STCTransaction(
+          var transaction = await FlutterOppwa.submitTransaction(
+            CardTransaction(
               checkoutId: checkoutId,
-              verificationOption: STCPayVerificationOption.mobilePhone,
+              // brand: "VISA",
+              number: FlutterOppwaTest.visa3dEnrolled,
+              holder: "Test Person",
+              cvv: "456",
+              expiryMonth: "10",
+              expiryYear: "2025",
+              tokenize: true,
             ),
           );
+          // var transaction = await FlutterOppwa.submitSTCTransaction(
+          //   STCTransaction(
+          //     checkoutId: checkoutId,
+          //     verificationOption: STCPayVerificationOption.mobilePhone,
+          //   ),
+          // );
           var status = await FlutterOppwaTest.requestPaymentStatus(
               checkoutInfo.resourcePath!);
           print(status);
@@ -89,8 +133,6 @@ class _MyAppState extends State<MyApp> {
         print("[${e.paymentError!.code}] ${e.paymentError!.message}");
       }
       print("[${e.errorCode}] ${e.errorMessage}");
-    } catch (e) {
-      print(e);
     }
   }
 }

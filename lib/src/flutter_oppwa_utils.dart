@@ -37,4 +37,7 @@ class FlutterOppwaUtils {
 
   static Future<bool> get isPlayServicesBaseAvailable async =>
       await FlutterOppwa._invoke<bool>("isPlayServicesBaseAvailable") == true;
+
+  static Future<bool> get isApplePayAvailable async =>
+      await FlutterOppwa._invoke<bool>("isApplePayAvailable") == true;
 }

@@ -53,24 +53,29 @@ class FlutterOppwa {
     return await _invoke("initialize", {"mode": mode.name}) == true;
   }
 
-  static Future<Transaction?> _submitTransaction(
-      String method, BaseTransaction transaction) async {
-    return _invokeMap(method, Transaction.fromMap, transaction.toMap());
+  /// Submitting means that the transaction is sent to the server, where it will cause a debit of the given amount on the account specified in the [PaymentParams].
+  static Future<Transaction?> submitTransaction(
+      BaseTransaction transaction) async {
+    return _invokeMap(
+        "submit_transaction", Transaction.fromMap, transaction.toMap());
   }
 
-  static Future<Transaction?> submitCardTransaction(
-      CardTransaction transaction) async {
-    return _submitTransaction("card_transaction", transaction);
+  /// On storing a payment data. The method creates a just registration separate from any later payment.
+  static Future<Transaction?> registerTransaction(
+      BaseTransaction transaction) async {
+    return _invokeMap(
+        "register_transaction", Transaction.fromMap, transaction.toMap());
   }
 
-  static Future<Transaction?> submitSTCTransaction(
-      STCTransaction transaction) async {
-    return _submitTransaction("stc_transaction", transaction);
-  }
-
-  static Future<Transaction?> submitTokenTransaction(
-      TokenTransaction transaction) async {
-    return _submitTransaction("token_transaction", transaction);
+  /// Depending on the endpoint the transaction will be submitted or registered only without making the payment.
+  ///
+  /// [transaction] The transaction to be sent.
+  ///
+  /// [endpoint] The endpoint which will be used for processing transaction. The endpoint must start with a `"/"`.
+  static Future<Transaction?> sendTransaction(
+      BaseTransaction transaction, String endpoint) async {
+    return _invokeMap("send_transaction", Transaction.fromMap,
+        {"endpoint": endpoint, ...transaction.toMap()});
   }
 
   static Future<CheckoutInfo?> requestCheckoutInfo(String checkoutId) async {

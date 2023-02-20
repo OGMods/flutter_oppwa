@@ -132,12 +132,20 @@ class FlutterOppwaTest {
         break;
       }
     }
-    if (request == null) {
-      throw FlutterOppwaException(
-        errorCode: "not_found",
-        errorMessage: "No related checkout id request found.",
-      );
-    }
+    request = _RequestData(
+      ProviderMode.test,
+      _getAuthorizationBearer(
+        _defaultTestUserId,
+        _defaultTestPassword,
+      ),
+      _defaultTestEntityId,
+    );
+    // if (request == null) {
+    //   throw FlutterOppwaException(
+    //     errorCode: "not_found",
+    //     errorMessage: "No related checkout id request found.",
+    //   );
+    // }
     var result = await _sendPaymentStatusRequest(
       resourcePath,
       request.mode,

@@ -27,6 +27,7 @@ import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
+
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
@@ -39,6 +40,7 @@ class FlutterOppwaDelegate extends CustomTabsServiceConnection implements ITrans
     private final String shopperResultUrl;
     private boolean didRedirect = false;
     private Transaction transaction;
+    private String transactionType = "submit";
 
     private void success(Object result) {
         handler.post(() -> this.result.success(result));
@@ -57,8 +59,21 @@ class FlutterOppwaDelegate extends CustomTabsServiceConnection implements ITrans
     }
 
     public void submitTransaction(Transaction transaction) throws PaymentException {
+        transactionType = "submit";
         transaction.getPaymentParams().setShopperResultUrl(shopperResultUrl + "://result");
         provider.submitTransaction(transaction, this);
+    }
+
+    public void registerTransaction(Transaction transaction) throws PaymentException {
+        transactionType = "register";
+        transaction.getPaymentParams().setShopperResultUrl(shopperResultUrl + "://result");
+        provider.registerTransaction(transaction, this);
+    }
+
+    public void sendTransaction(Transaction transaction, String endpoint) {
+        transactionType = "send";
+        transaction.getPaymentParams().setShopperResultUrl(shopperResultUrl + "://result");
+        provider.sendTransaction(transaction, endpoint, this);
     }
 
     public void requestCheckoutInfo(String checkoutId) {
@@ -72,18 +87,18 @@ class FlutterOppwaDelegate extends CustomTabsServiceConnection implements ITrans
 
     @Override
     public void paymentConfigRequestFailed(@NonNull PaymentError paymentError) {
-        error("payment_error", "config request failed", FlutterOppwaUtils.toJson(paymentError));
+        error("payment_error", "Config request failed", FlutterOppwaUtils.toJson(paymentError));
     }
 
     @Override
     public void transactionCompleted(@NonNull Transaction transaction) {
-        if (transaction.getTransactionType() == TransactionType.SYNC) {
+        if (!transactionType.equals("submit") || transaction.getTransactionType() == TransactionType.SYNC) {
             success(FlutterOppwaUtils.toJson(transaction));
         } else {
             if (transaction.getRedirectUrl() == null) {
                 Map<String, Object> details = new HashMap<>();
                 details.put("transaction", FlutterOppwaUtils.toJson(transaction));
-                error("invalid_transaction", "the transaction type was async but the redirect url was null", details);
+                error("invalid_transaction", "The transaction type was async but the redirect url was null", details);
                 return;
             }
             this.transaction = transaction;
@@ -122,7 +137,7 @@ class FlutterOppwaDelegate extends CustomTabsServiceConnection implements ITrans
                     } else {
                         Map<String, Object> details = new HashMap<>();
                         details.put("transaction", FlutterOppwaUtils.toJson(transaction));
-                        error("payment_canceled", "the payment was canceled", details);
+                        error("payment_canceled", "The payment was canceled", details);
                     }
                     binding.getActivity().getApplicationContext().unbindService(FlutterOppwaDelegate.this);
                 }

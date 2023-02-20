@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-extension ModelUtils on Map<String, dynamic> {
+extension Parser on Map<String, dynamic> {
   DateTime? getTime(String key) => getNullableValue<DateTime>(key);
 
   bool getBool(String key, [bool defaultValue = false]) {

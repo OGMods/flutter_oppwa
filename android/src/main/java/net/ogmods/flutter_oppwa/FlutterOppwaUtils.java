@@ -34,8 +34,9 @@ class FlutterOppwaUtils {
     public static String getPackageName(Activity activity) {
         return CustomTabsClient.getPackageName(activity, Collections.singletonList("com.android.chrome"));
     }
+
     private static <T> void putNullable(Map<String, Object> map, String name, @Nullable T value) {
-        if(value != null) map.put(name, value);
+        if (value != null) map.put(name, value);
     }
 
     public static Map<String, Object> toJson(PaymentException error) {
@@ -44,21 +45,21 @@ class FlutterOppwaUtils {
 
     public static Map<String, Object> toJson(PaymentError error) {
         Map<String, Object> map = new HashMap<>();
-        putNullable(map,"code", FlutterEnums.toJson(FlutterEnums.FlutterErrorCode.values(), error.getErrorCode()));
-        putNullable(map,"message", error.getErrorMessage());
-        putNullable(map,"info", error.getErrorInfo());
+        putNullable(map, "code", FlutterEnums.toJson(FlutterEnums.FlutterErrorCode.values(), error.getErrorCode()));
+        putNullable(map, "message", error.getErrorMessage());
+        putNullable(map, "info", error.getErrorInfo());
         return map;
     }
 
     public static Map<String, Object> toJson(Transaction transaction) {
         Map<String, Object> map = new HashMap<>();
-        putNullable(map,"transactionType", FlutterEnums.toJson(FlutterEnums.FlutterTransactionType.values(), transaction.getTransactionType()));
-        putNullable(map,"brandSpecificInfo", transaction.getBrandSpecificInfo());
-        putNullable(map,"paymentParams", toJson(transaction.getPaymentParams()));
-        putNullable(map,"threeDS2Info", toJson(transaction.getThreeDS2Info()));
-        putNullable(map,"yooKassaInfo", toJson(transaction.getYooKassaInfo()));
-        putNullable(map,"redirectUrl", transaction.getRedirectUrl());
-        putNullable(map,"threeDS2MethodRedirectUrl", transaction.getThreeDS2MethodRedirectUrl());
+        putNullable(map, "transactionType", FlutterEnums.toJson(FlutterEnums.FlutterTransactionType.values(), transaction.getTransactionType()));
+        putNullable(map, "brandSpecificInfo", transaction.getBrandSpecificInfo());
+        putNullable(map, "paymentParams", toJson(transaction.getPaymentParams()));
+        putNullable(map, "threeDS2Info", toJson(transaction.getThreeDS2Info()));
+        putNullable(map, "yooKassaInfo", toJson(transaction.getYooKassaInfo()));
+        putNullable(map, "redirectUrl", transaction.getRedirectUrl());
+        putNullable(map, "threeDS2MethodRedirectUrl", transaction.getThreeDS2MethodRedirectUrl());
         return map;
     }
 
@@ -98,9 +99,10 @@ class FlutterOppwaUtils {
         putNullable(map, "shopperResultUrl", params.getShopperResultUrl());
         return map;
     }
+
     @Nullable
     public static Map<String, Object> toJson(@Nullable BillingAddress address) {
-        if(address == null) return  null;
+        if (address == null) return null;
         Map<String, Object> map = new HashMap<>();
         putNullable(map, "country", address.getCountry());
         putNullable(map, "state", address.getState());
@@ -110,11 +112,12 @@ class FlutterOppwaUtils {
         putNullable(map, "street2", address.getStreet2());
         return map;
     }
+
     @Nullable
     public static Map<String, Object> toJson(@Nullable ThreeDS2Info info) {
-        if(info == null) return  null;
+        if (info == null) return null;
         Map<String, Object> map = new HashMap<>();
-        putNullable(map, "authStatus", FlutterEnums.toJson(FlutterEnums.FlutterAuthStatus.values(), info.getAuthStatus()));
+        putNullable(map, "authStatus", FlutterEnums.toJson(FlutterEnums.FlutterThreeDS2Status.values(), info.getAuthStatus()));
         putNullable(map, "authResponse", info.getAuthResponse());
         putNullable(map, "callbackUrl", info.getCallbackUrl());
         putNullable(map, "cardHolderInfo", info.getCardHolderInfo());
@@ -122,18 +125,20 @@ class FlutterOppwaUtils {
         putNullable(map, "protocolVersion", info.getProtocolVersion());
         return map;
     }
+
     @Nullable
     public static Map<String, Object> toJson(@Nullable YooKassaInfo info) {
-        if(info == null) return  null;
+        if (info == null) return null;
         Map<String, Object> map = new HashMap<>();
         putNullable(map, "status", FlutterEnums.toJson(FlutterEnums.FlutterYooKassaStatus.values(), info.getStatus()));
         putNullable(map, "confirmationUrl", info.getConfirmationUrl());
         putNullable(map, "callbackUrl", info.getCallbackUrl());
         return map;
     }
+
     @Nullable
     public static Map<String, Object> toJson(@Nullable CheckoutInfo info) {
-        if(info == null) return  null;
+        if (info == null) return null;
         Map<String, Object> map = new HashMap<>();
         putNullable(map, "amount", info.getAmount());
         putNullable(map, "brands", toList(info.getBrands()));
@@ -144,7 +149,7 @@ class FlutterOppwaUtils {
         putNullable(map, "threeDs2Brands", toList(info.getThreeDS2Brands()));
         putNullable(map, "threeDs2Flow", FlutterEnums.toJson(FlutterEnums.FlutterCheckoutThreeDS2Flow.values(), info.getThreeDS2Flow()));
         Token[] tokens = info.getTokens();
-        if(tokens != null) {
+        if (tokens != null) {
             List<Map<String, Object>> tokensJson = new ArrayList<>();
             for (Token token : tokens) tokensJson.add(toJson(token));
             putNullable(map, "tokens", tokensJson);
@@ -161,17 +166,19 @@ class FlutterOppwaUtils {
         putNullable(map, "virtualAccount", toJson(token.getVirtualAccount()));
         return map;
     }
+
     @Nullable
     public static Map<String, Object> toJson(@Nullable BankAccount account) {
-        if(account == null) return  null;
+        if (account == null) return null;
         Map<String, Object> map = new HashMap<>();
         putNullable(map, "holder", account.getHolder());
         putNullable(map, "iban", account.getIban());
         return map;
     }
+
     @Nullable
     public static Map<String, Object> toJson(@Nullable Card card) {
-        if(card == null) return  null;
+        if (card == null) return null;
         Map<String, Object> map = new HashMap<>();
         putNullable(map, "expiryMonth", card.getExpiryMonth());
         putNullable(map, "expiryYear", card.getExpiryYear());
@@ -179,39 +186,19 @@ class FlutterOppwaUtils {
         putNullable(map, "last4Digits", card.getLast4Digits());
         return map;
     }
+
     @Nullable
     public static Map<String, Object> toJson(@Nullable VirtualAccount account) {
-        if(account == null) return  null;
+        if (account == null) return null;
         Map<String, Object> map = new HashMap<>();
         putNullable(map, "holder", account.getHolder());
         putNullable(map, "accountId", account.getAccountId());
         return map;
     }
+
     @Nullable
-    public static Map<String, Object> toJson(@Nullable BrandInfo info) {
-        if(info == null) return  null;
-        Map<String, Object> map = new HashMap<>();
-        putNullable(map, "brand", info.getBrand());
-        putNullable(map, "label", info.getLabel());
-        putNullable(map, "renderType", info.getRenderType());
-        putNullable(map, "cardBrandInfo", toJson(info.getCardBrandInfo()));
-        return map;
-    }
-    @Nullable
-    public static Map<String, Object> toJson(@Nullable CardBrandInfo info) {
-        if(info == null) return  null;
-        Map<String, Object> map = new HashMap<>();
-        putNullable(map, "cvvLength", info.getCvvLength());
-        putNullable(map, "cvvMode", FlutterEnums.toJson(FlutterEnums.FlutterCVVMode.values(), info.getCvvMode()));
-        putNullable(map, "detection", info.getDetection());
-        putNullable(map, "pattern", info.getPattern());
-        putNullable(map, "validation", info.getValidation());
-        return map;
-    }
-    @Nullable
-    public static <T> List<T> toList(@Nullable T[] array)
-    {
-        if(array == null) return  null;
+    public static <T> List<T> toList(@Nullable T[] array) {
+        if (array == null) return null;
         List<T> list = new ArrayList<>();
         Collections.addAll(list, array);
         return list;

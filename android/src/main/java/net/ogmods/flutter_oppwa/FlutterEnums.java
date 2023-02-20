@@ -4,7 +4,6 @@ import androidx.annotation.Nullable;
 
 import com.oppwa.mobile.connect.checkout.meta.CheckoutThreeDS2Flow;
 import com.oppwa.mobile.connect.exception.ErrorCode;
-import com.oppwa.mobile.connect.payment.CVVMode;
 import com.oppwa.mobile.connect.payment.stcpay.STCPayVerificationOption;
 import com.oppwa.mobile.connect.provider.Connect;
 import com.oppwa.mobile.connect.provider.ThreeDS2Info;
@@ -18,21 +17,14 @@ public class FlutterEnums {
 
     @Nullable
     public static <T, K extends Enum<K> & FlutterEnum<T>> String toJson(K[] values, @Nullable T value) {
-        if(value == null) return null;
+        if (value == null) return null;
         for (K e : values) if (e.getValue().equals(value)) return e.name();
         return null;
     }
 
     @Nullable
-    public static <T, K extends Enum<K> & FlutterEnum<T>> K find(K[] values, @Nullable T value) {
-        if(value == null) return null;
-        for (K e : values) if (e.getValue().equals(value)) return e;
-        return null;
-    }
-
-    @Nullable
     public static <K extends Enum<K>> K find(K[] values, @Nullable String value) {
-        if(value == null) return null;
+        if (value == null) return null;
         for (K e : values) if (e.name().equals(value)) return e;
         return null;
     }
@@ -137,7 +129,7 @@ public class FlutterEnums {
         }
     }
 
-    public enum FlutterAuthStatus implements FlutterEnum<ThreeDS2Info.AuthStatus> {
+    public enum FlutterThreeDS2Status implements FlutterEnum<ThreeDS2Info.AuthStatus> {
         authenticated(ThreeDS2Info.AuthStatus.AUTHENTICATED),
         attemptProcessingPerformed(ThreeDS2Info.AuthStatus.ATTEMPT_PROCESSING_PERFORMED),
         challengeRequired(ThreeDS2Info.AuthStatus.CHALLENGE_REQUIRED),
@@ -149,7 +141,7 @@ public class FlutterEnums {
 
         private final ThreeDS2Info.AuthStatus value;
 
-        FlutterAuthStatus(final ThreeDS2Info.AuthStatus value) {
+        FlutterThreeDS2Status(final ThreeDS2Info.AuthStatus value) {
             this.value = value;
         }
 
@@ -158,64 +150,49 @@ public class FlutterEnums {
             return this.value;
         }
     }
-    public enum FlutterCVVMode implements FlutterEnum<CVVMode> {
-        none(CVVMode.NONE),
-        optional(CVVMode.OPTIONAL),
-        required(CVVMode.REQUIRED);
 
-        private final CVVMode value;
-
-        FlutterCVVMode(final CVVMode value) {
-            this.value = value;
-        }
-
-        @Override
-        public CVVMode getValue() {
-            return this.value;
-        }
-    }
     public enum FlutterErrorCode implements FlutterEnum<ErrorCode> {
-        errorCodePaymentParamsInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_INVALID),
-        errorCodePaymentParamsCheckoutIdInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CHECKOUT_ID_INVALID),
-        errorCodePaymentParamsPaymentBrandInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_PAYMENT_BRAND_INVALID),
-        errorCodePaymentParamsTokenInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_TOKEN_INVALID),
-        errorCodePaymentParamsTokenizationUnsupported(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_TOKENIZATION_UNSUPPORTED),
-        errorCodePaymentParamsCardHolderInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_HOLDER_INVALID),
-        errorCodePaymentParamsCardNumberInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_NUMBER_INVALID),
-        errorCodePaymentParamsCardBrandInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_BRAND_INVALID),
-        errorCodePaymentParamsCardMonthInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_MONTH_INVALID),
-        errorCodePaymentParamsCardYearInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_YEAR_INVALID),
-        errorCodePaymentParamsCardExpired(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_EXPIRED),
-        errorCodePaymentParamsCardCvvInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_CVV_INVALID),
-        errorCodePaymentParamsBankAccountHolderInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_HOLDER_INVALID),
-        errorCodePaymentParamsBankAccountIbanInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_IBAN_INVALID),
-        errorCodePaymentParamsBankAccountCountryInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_COUNTRY_INVALID),
-        errorCodePaymentParamsBankAccountBankNameInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_BANK_NAME_INVALID),
-        errorCodePaymentParamsBankAccountNumberInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_NUMBER_INVALID),
-        errorCodePaymentParamsBankAccountBicInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_BIC_INVALID),
-        errorCodePaymentParamsBankAccountBankCodeInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_BANK_CODE_INVALID),
-        errorCodePaymentParamsMobilePhoneInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_MOBILE_PHONE_INVALID),
-        errorCodePaymentParamsCountryCodeInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_COUNTRY_CODE_INVALID),
-        errorCodePaymentParamsEmailInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_EMAIL_INVALID),
-        errorCodePaymentParamsNationalIdentifierInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_NATIONAL_IDENTIFIER_INVALID),
-        errorCodePaymentParamsAccountVerificationInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_ACCOUNT_VERIFICATION_INVALID),
-        errorCodePaymentParamsPaymentTokenMissing(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_PAYMENT_TOKEN_MISSING),
-        errorCodePaymentProviderNotInitialized(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_NOT_INITIALIZED),
-        errorCodePaymentProviderInternalError(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_INTERNAL_ERROR),
-        errorCodePaymentProviderSecurityInvalidChecksum(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_SECURITY_INVALID_CHECKSUM),
-        errorCodePaymentProviderSecuritySslValidationFailed(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_SECURITY_SSL_VALIDATION_FAILED),
-        errorCodePaymentProviderConnectionFailure(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_CONNECTION_FAILURE),
-        errorCodePaymentProviderConnectionMalformedResponse(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_CONNECTION_MALFORMED_RESPONSE),
-        errorCodeNoAvailablePaymentMethods(ErrorCode.ERROR_CODE_NO_AVAILABLE_PAYMENT_METHODS),
-        errorCodePaymentMethodNotAvailable(ErrorCode.ERROR_CODE_PAYMENT_METHOD_NOT_AVAILABLE),
-        errorCodeCheckoutSettingsMissed(ErrorCode.ERROR_CODE_CHECKOUT_SETTINGS_MISSED),
-        errorCodeTransactionAborted(ErrorCode.ERROR_CODE_TRANSACTION_ABORTED),
-        errorCodeUnexpectedException(ErrorCode.ERROR_CODE_UNEXPECTED_EXCEPTION),
-        errorCodeGooglepay(ErrorCode.ERROR_CODE_GOOGLEPAY),
-        errorCodeKlarnaInline(ErrorCode.ERROR_CODE_KLARNA_INLINE),
-        errorCodeBancontactLink(ErrorCode.ERROR_CODE_BANCONTACT_LINK),
-        errorCodeThreeds2Failed(ErrorCode.ERROR_CODE_THREEDS2_FAILED),
-        errorCodeThreeds2Canceled(ErrorCode.ERROR_CODE_THREEDS2_CANCELED);
+        paymentParamsInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_INVALID),
+        paymentParamsCheckoutIdInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CHECKOUT_ID_INVALID),
+        paymentParamsBrandInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_PAYMENT_BRAND_INVALID),
+        paymentParamsTokenIdInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_TOKEN_INVALID),
+        paymentParamsTokenizationUnsupported(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_TOKENIZATION_UNSUPPORTED),
+        cardHolderInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_HOLDER_INVALID),
+        cardNumberInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_NUMBER_INVALID),
+        cardBrandInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_BRAND_INVALID),
+        cardMonthInvalidFormat(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_MONTH_INVALID),
+        cardYearInvalidFormat(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_YEAR_INVALID),
+        cardExpired(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_EXPIRED),
+        cardCvvInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_CARD_CVV_INVALID),
+        bankAccountHolderInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_HOLDER_INVALID),
+        bankAccountIbanInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_IBAN_INVALID),
+        bankAccountCountryInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_COUNTRY_INVALID),
+        bankAccountBankNameInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_BANK_NAME_INVALID),
+        bankAccountBicInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_BIC_INVALID),
+        bankAccountBankCodeInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_BANK_CODE_INVALID),
+        bankAccountNumberInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_BANK_ACCOUNT_NUMBER_INVALID),
+        phoneNumberInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_MOBILE_PHONE_INVALID),
+        countryCodeInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_COUNTRY_CODE_INVALID),
+        emailInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_EMAIL_INVALID),
+        nationalIdentifierInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_NATIONAL_IDENTIFIER_INVALID),
+        accountVerificationInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_ACCOUNT_VERIFICATION_INVALID),
+        paymentTokenInvalid(ErrorCode.ERROR_CODE_PAYMENT_PARAMS_PAYMENT_TOKEN_MISSING),
+        paymentProviderNotInitialized(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_NOT_INITIALIZED),
+        paymentProviderInternalError(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_INTERNAL_ERROR),
+        paymentProviderSecurityInvalidChecksum(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_SECURITY_INVALID_CHECKSUM),
+        paymentProviderSecuritySslValidationFailed(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_SECURITY_SSL_VALIDATION_FAILED),
+        paymentProviderConnectionFailure(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_CONNECTION_FAILURE),
+        paymentProviderConnectionMalformedResponse(ErrorCode.ERROR_CODE_PAYMENT_PROVIDER_CONNECTION_MALFORMED_RESPONSE),
+        noAvailablePaymentMethods(ErrorCode.ERROR_CODE_NO_AVAILABLE_PAYMENT_METHODS),
+        paymentMethodNotAvailable(ErrorCode.ERROR_CODE_PAYMENT_METHOD_NOT_AVAILABLE),
+        checkoutSettingsMissed(ErrorCode.ERROR_CODE_CHECKOUT_SETTINGS_MISSED),
+        transactionAborted(ErrorCode.ERROR_CODE_TRANSACTION_ABORTED),
+        unexpectedException(ErrorCode.ERROR_CODE_UNEXPECTED_EXCEPTION),
+        googlepay(ErrorCode.ERROR_CODE_GOOGLEPAY),
+        klarnaInline(ErrorCode.ERROR_CODE_KLARNA_INLINE),
+        bancontactLink(ErrorCode.ERROR_CODE_BANCONTACT_LINK),
+        threeds2Failed(ErrorCode.ERROR_CODE_THREEDS2_FAILED),
+        threeds2Canceled(ErrorCode.ERROR_CODE_THREEDS2_CANCELED);
 
         private final ErrorCode value;
 
