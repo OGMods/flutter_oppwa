@@ -428,6 +428,11 @@ class FlutterOppwaException {
     this.errorMessage,
     this.paymentError,
   });
+
+  @override
+  String toString() {
+    return "[$errorCode] $errorMessage";
+  }
 }
 
 class PaymentError {

@@ -19,8 +19,6 @@ class BaseTransaction {
 
 /// Class to represent a set of card parameters needed for performing an e-commerce card transaction.
 ///
-/// It offers convenience methods for checking if the number is valid, i.e. if it passes the Luhn check and can be assigned to one of the major card companies.
-///
 /// Will become [CardPaymentParams] when it comes back from the native side
 class CardTransaction extends BaseTransaction {
   /// The card number of the transaction.
@@ -83,73 +81,6 @@ class CardTransaction extends BaseTransaction {
       "cvv": cvv,
       "tokenize": tokenize,
     }..removeWhere((key, value) => value == null);
-  }
-
-  /// Checks if the [holder] name is filled with sufficient data to perform a transaction.
-  ///
-  /// Returns true if the holder name length greater than 3 characters and less than 128 character.
-  static bool isHolderValid(String holder) {
-    return holder.length > 3 && holder.length < 128;
-  }
-
-  /// Checks if the card [number] is filled with sufficient data to perform a transaction.
-  ///
-  /// If the [luhnCheck] is set to true, the [number] should pass Luhn test http://en.wikipedia.org/wiki/Luhn_algorithm.
-  ///
-  /// Returns true if the number consists of 10-19 digits and passes luhn test
-  static bool isNumberValid(String number, bool luhnCheck) {
-    // TODO
-    return true;
-  }
-
-  /// Checks if the card [expiryMonth] is filled with sufficient data to perform a transaction.
-  ///
-  /// Returns true if the card expiry month is in the format `MM`.
-  static bool isExpiryMonthValid(String expiryMonth) {
-    var month = int.tryParse(expiryMonth);
-    return expiryMonth.length == 2 &&
-        month != null &&
-        month >= 1 &&
-        month <= 12;
-  }
-
-  /// Checks if the card [expiryYear] is filled with sufficient data to perform a transaction.
-  ///
-  /// Returns true if the card expiry year is in the format `YYYY`.
-  static bool isExpiryYearValid(String expiryYear) {
-    var year = int.tryParse(expiryYear);
-    return expiryYear.length == 4 && year != null;
-  }
-
-  /// Checks if the [countryCode] is filled with sufficient data to perform a transaction.
-  ///
-  /// Returns true if the country code contains digits only.
-  static bool isCountryCodeValid(String countryCode) {
-    // TODO
-    return true;
-  }
-
-  /// Checks if the [mobilePhone] is filled with sufficient data to perform a transaction.
-  ///
-  /// Returns true if the mobile phone number contains digits only.
-  static bool isMobilePhoneValid(String mobilePhone) {
-    // TODO
-    return true;
-  }
-
-  /// Checks if the [month] and [year] have been set and whether or not card is expired.
-  ///
-  /// Returns true if the month or the year is expired.
-  static bool isExpiredWithExpiryMonth(String month, String year) {
-    if (isExpiryMonthValid(month) && isExpiryYearValid(year)) {
-      var m = int.tryParse(month);
-      var y = int.tryParse(year);
-      var n = DateTime.now();
-      if (m != null && y != null) {
-        return y > n.year || (y == n.year && m >= n.month);
-      }
-    }
-    return true;
   }
 }
 
@@ -233,7 +164,6 @@ class AppleTransaction extends BaseTransaction {
     }..removeWhere((key, value) => value == null);
   }
 }
-
 
 // class BrandInfo {
 //   final String? label;

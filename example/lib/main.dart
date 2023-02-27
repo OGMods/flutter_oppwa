@@ -54,7 +54,7 @@ class _MyAppState extends State<MyApp> {
       print(
           "isApplePayAvailable: ${await FlutterOppwaUtils.isApplePayAvailable}");
       var checkoutId2 = await FlutterOppwaTest.requestCheckoutId(
-        9.99, "SAR",
+        1.0, "SAR",
         type: PaymentType.debit,
         // extraParameters: {
         //   "createRegistration": "true",

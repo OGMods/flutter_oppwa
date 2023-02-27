@@ -38,6 +38,7 @@ class FlutterOppwaTest {
           if (authorizationBearer != null) "Authorization": authorizationBearer,
         },
       );
+      print(response.body);
       if (response.statusCode >= 400) {
         throw FlutterOppwaException(
           errorCode: "request_failed",
@@ -132,20 +133,12 @@ class FlutterOppwaTest {
         break;
       }
     }
-    request = _RequestData(
-      ProviderMode.test,
-      _getAuthorizationBearer(
-        _defaultTestUserId,
-        _defaultTestPassword,
-      ),
-      _defaultTestEntityId,
-    );
-    // if (request == null) {
-    //   throw FlutterOppwaException(
-    //     errorCode: "not_found",
-    //     errorMessage: "No related checkout id request found.",
-    //   );
-    // }
+    if (request == null) {
+      throw FlutterOppwaException(
+        errorCode: "not_found",
+        errorMessage: "No related checkout id request found.",
+      );
+    }
     var result = await _sendPaymentStatusRequest(
       resourcePath,
       request.mode,
